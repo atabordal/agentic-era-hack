@@ -229,6 +229,7 @@ class EventProcessor:
         )
         # Each event is a tuple message, metadata. https://langchain-ai.github.io/langgraph/how-tos/streaming/#messages
         for message, _ in stream:
+            print("**MESSAGE**", message)
             if isinstance(message, dict):
                 if message.get("type") == "constructor":
                     message = message["kwargs"]
@@ -239,8 +240,10 @@ class EventProcessor:
                         ai_message = AIMessage(content="", tool_calls=tool_calls)
                         self.tool_calls.append(ai_message.model_dump())
                         for tool_call in tool_calls:
+                            print("--TOOL CALL: ", tool_call)
                             msg = f"\n\nCalling tool: `{tool_call['name']}` with args: `{tool_call['args']}`"
                             self.stream_handler.new_status(msg)
+                        print("--MSG: ", msg)
 
                     # Handle tool responses
                     elif message.get("tool_call_id"):
@@ -252,14 +255,18 @@ class EventProcessor:
                         self.tool_calls.append(tool_message)
                         msg = f"\n\nTool response: `{content}`"
                         self.stream_handler.new_status(msg)
+                        self.stream_handler.new_token(content)
+                        self.final_content = content  
 
                     # Handle AI responses
                     elif content := message.get("content"):
-                        self.final_content += content
+                        #self.final_content += content
+                        print("--EN EL ELIF ", self.final_content)
                         self.stream_handler.new_token(content)
 
         # Handle end of stream
         if self.final_content:
+            print("El contenido final esss: ", self.final_content)
             final_message = AIMessage(
                 content=self.final_content,
                 id=self.current_run_id,

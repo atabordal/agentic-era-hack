@@ -27,6 +27,7 @@ from langgraph.prebuilt import ToolNode
 
 from app.retrievers import get_compressor, get_retriever
 from app.templates import format_docs, inspect_conversation_template, rag_template
+import app.json_validation as json_validation
 
 EMBEDDING_MODEL = "text-embedding-005"
 LOCATION = "us-central1"
@@ -78,6 +79,18 @@ def retrieve_docs(query: str) -> tuple[str, list[Document]]:
     formatted_docs = format_docs.format(docs=ranked_docs)
     return (formatted_docs, ranked_docs)
 
+@tool
+def validation(pdf: str) -> str:
+    """
+    Use this tool if the user says 'HOLA'.
+
+    Args:
+        pdf (str): The pdf extraction.
+    """
+    print("---el input que llego es: ", pdf)
+    response = json_validation.main(pdf)
+    print("---response----", response)
+    return response
 
 @tool
 def should_continue() -> None:
@@ -87,7 +100,7 @@ def should_continue() -> None:
     return None
 
 
-tools = [retrieve_docs, should_continue]
+tools = [validation, should_continue]
 
 llm = ChatVertexAI(model=LLM, temperature=0, max_tokens=1024, streaming=True)
 

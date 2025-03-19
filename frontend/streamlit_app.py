@@ -167,6 +167,12 @@ def handle_user_input(side_bar: SideBar) -> None:
             uploaded_files=side_bar.uploaded_files,
             gcs_uris=side_bar.gcs_uris,
         )
+        for file in side_bar.uploaded_files:
+            if file:
+                file_bytes = file.read()
+                print("***********FILE: ", file.name)
+                print("***********FILE BYTES: ", file_bytes)
+
         st.session_state["gcs_uris_to_be_sent"] = ""
         parts.append({"type": "text", "text": prompt})
         st.session_state.user_chats[st.session_state["session_id"]]["messages"].append(
